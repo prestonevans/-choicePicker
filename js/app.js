@@ -1,5 +1,7 @@
 const textArea = document.querySelector('textarea');
 const displayChoices = document.querySelector('.display-choices');
+const intervalLenght = 200;
+const numberOfAnimationRepeats = 20;
 
 let intervalId;
 
@@ -12,14 +14,15 @@ textArea.addEventListener('keyup', (e) => {
 
   const arrayOfStrings = e.target.value
     .split(',')
-    .map((choice) => choice.trim());
+    .map((choice) => choice.trim())
+    .filter((choice) => choice.length !== 0);
 
-  display(arrayOfStrings);
-  randomActiveClass(arrayOfStrings);
+  renderChoices(arrayOfStrings);
+  randomChoiceAnimation(arrayOfStrings.length);
   finalChoice(Math.floor(Math.random() * arrayOfStrings.length));
 });
 
-function display(arrayOfStrings) {
+function renderChoices(arrayOfStrings) {
   displayChoices.innerHTML = '';
   arrayOfStrings.forEach((choiceString) => {
     const choiceBlock = document.createElement('div');
@@ -30,27 +33,39 @@ function display(arrayOfStrings) {
   });
 }
 
-function randomActiveClass(arrayOfStrings) {
+function randomChoiceAnimation() {
   intervalId = setInterval(() => {
     const choices = document.querySelectorAll('.choice-block');
-    choices.forEach((choice) => choice.classList.remove('active'));
+    let previousValue;
+    choices.forEach((choice, index) => {
+      if (choice.classList.contains('active')) previousValue = index;
+      choice.classList.remove('active');
+    });
 
-    choices[Math.floor(Math.random() * arrayOfStrings.length)].classList.add(
+    choices[roundRobinRandomizer(previousValue, choices.length)].classList.add(
       'active'
     );
-  }, 200);
+  }, intervalLenght);
 }
 
-function finalChoice(randomChoice) {
+function roundRobinRandomizer(previousValue, numberOfChoices) {
+  let randomIndex;
+  do {
+    randomIndex = Math.floor(Math.random() * numberOfChoices);
+  } while (randomIndex === previousValue);
+  return randomIndex;
+}
+
+function finalChoice(randomChoiceIndex) {
   setTimeout(
     () => {
       const choices = document.querySelectorAll('.choice-block');
 
       clearInterval(intervalId);
       choices.forEach((choice) => choice.classList.remove('active'));
-      choices[randomChoice].classList.add('active');
+      choices[randomChoiceIndex].classList.add('active');
     },
-    200 * 10,
-    randomChoice
+    intervalLenght * numberOfAnimationRepeats,
+    randomChoiceIndex
   );
 }
