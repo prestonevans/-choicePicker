@@ -49,6 +49,7 @@ function randomChoiceAnimation() {
 }
 
 function roundRobinRandomizer(previousValue, numberOfChoices) {
+  if (numberOfChoices <= 1) return 0;
   let randomIndex;
   do {
     randomIndex = Math.floor(Math.random() * numberOfChoices);
